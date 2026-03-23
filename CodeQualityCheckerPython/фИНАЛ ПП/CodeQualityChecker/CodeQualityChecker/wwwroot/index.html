@@ -1,0 +1,1471 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Code Quality Checker </title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 25px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            font-size: 24px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 25px;
+        }
+        
+        .editor-section, .results-section, .history-section {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title i {
+            font-size: 16px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+        
+        textarea {
+            min-height: 400px;
+            resize: vertical;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 111, 165, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-analyze {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .btn-export {
+            background: linear-gradient(135deg, var(--success-color), #218838);
+            margin-top: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .results-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .score-container {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .score-card {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .complexity-score { background: linear-gradient(to right, #e96443, #904e95); }
+        .maintainability-score { background: linear-gradient(to right, #2193b0, #6dd5ed); }
+        .security-score { background: linear-gradient(to right, #11998e, #38ef7d); }
+        .performance-score { background: linear-gradient(to right, #f6d365, #fda085); }
+        
+        .score-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .category-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .issue-list {
+            padding-left: 20px;
+        }
+        
+        .issue-item {
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #ddd;
+        }
+        
+        .issue-errors { border-left-color: var(--danger-color); background-color: rgba(220, 53, 69, 0.1); }
+        .issue-style { border-left-color: var(--warning-color); background-color: rgba(255, 193, 7, 0.1); }
+        .issue-security { border-left-color: var(--secondary-color); background-color: rgba(22, 96, 136, 0.1); }
+        .issue-performance { border-left-color: #6f42c1; background-color: rgba(111, 66, 193, 0.1); }
+        .issue-architecture { border-left-color: #fd7e14; background-color: rgba(253, 126, 20, 0.1); }
+        .issue-best { border-left-color: var(--success-color); background-color: rgba(40, 167, 69, 0.1); }
+        .issue-code-suggestion { border-left-color: #6f42c1; background-color: rgba(111, 66, 193, 0.1); }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+        
+        .summary-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .drag-drop-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 15px 0;
+        }
+        
+        .drag-drop-area:hover, .drag-drop-area.drag-over {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 111, 165, 0.05);
+        }
+        
+        .file-icon {
+            font-size: 48px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+        
+        .history-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .history-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+        
+        .visualization-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-code-branch"></i>
+            Code Quality Checker 
+        </div>
+        <div class="controls">
+            <button class="btn" id="newProjectBtn">
+                <i class="fas fa-folder-plus"></i> Новый проект
+            </button>
+            <button class="btn" id="settingsBtn">
+                <i class="fas fa-cog"></i> Настройки
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="editor-section">
+            <div class="section-title">
+                <i class="fas fa-edit"></i> Редактор кода
+            </div>
+
+            <div class="control-group">
+                <label for="languageSelect">Выберите язык:</label>
+                <select id="languageSelect">
+                    <option value="C#">C#</option>
+                    <option value="Python">Python</option>
+                    <option value="JavaScript">JavaScript</option>
+                    <option value="TypeScript">TypeScript</option>
+                    <option value="Java">Java</option>
+                    <option value="C++">C++</option>
+                    <option value="Go">Go</option>
+                    <option value="Rust">Rust</option>
+                    <option value="PHP">PHP</option>
+                    <option value="Ruby">Ruby</option>
+                    <option value="Swift">Swift</option>
+                    <option value="Kotlin">Kotlin</option>
+                    <option value="SQL">SQL</option>
+                    <option value="C">C</option>
+                    <option value="Objective-C">Objective-C</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="analysisType">Тип анализа:</label>
+                <select id="analysisType">
+                    <option value="Full">Полный анализ</option>
+                    <option value="SecurityOnly">Только безопасность</option>
+                    <option value="StyleOnly">Только стиль</option>
+                    <option value="Performance">Производительность</option>
+                    <option value="BestPractices">Лучшие практики</option>
+                    <option value="CodeExamples">Примеры улучшенного кода</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Загрузить файл:</label>
+                <div class="drag-drop-area" id="dragDropArea">
+                    <div class="file-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <p>Перетащите файл с кодом сюда или кликните для выбора</p>
+                    <p class="small-text">Поддерживаемые форматы: .cs, .py, .js, .ts, .java, .cpp, .go, .rs, .php, .rb, .swift, .kt, .sql, .c, .h</p>
+                    <input type="file" id="fileInput" accept=".cs,.py,.js,.ts,.java,.cpp,.go,.rs,.php,.rb,.swift,.kt,.sql,.c,.h,.hpp" style="display: none;">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="codeInput">Код для анализа:</label>
+                <textarea id="codeInput" placeholder="// Вставьте ваш код здесь или загрузите файл...">using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Program
+{
+    public static void Main()
+    {
+        var numbers = new List<int> { 1, 2, 3, 4, 5 };
+        var evenNumbers = numbers.Where(n => n % 2 == 0).ToList();
+        
+        Console.WriteLine("Четные числа:");
+        foreach (var num in evenNumbers)
+        {
+            Console.WriteLine(num);
+        }
+    }
+}</textarea>
+            </div>
+
+            <button class="btn btn-analyze" id="analyzeBtn">
+                <i class="fas fa-search"></i> Анализировать код
+            </button>
+        </div>
+
+        <div class="results-section">
+            <div class="tabs">
+                <div class="tab active" data-tab="analysis">Результаты анализа</div>
+                <div class="tab" data-tab="git">Git-репозиторий</div>
+                <div class="tab" data-tab="history">История</div>
+                <div class="tab" data-tab="visualization">Визуализация</div>
+            </div>
+
+            <div class="tab-content active" id="analysis-tab">
+                <div class="results-container">
+                    <div id="loading" style="display: none; text-align: center; padding: 40px;">
+                        <div class="spinner" style="font-size: 24px; color: var(--primary-color); margin-bottom: 15px;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                        <p>Анализируется код... Это может занять 1-2 минуты</p>
+                    </div>
+                    <div id="resultContent">
+                        <p style="color: #888; text-align: center; padding: 40px 0;">
+                            <i class="fas fa-code" style="font-size: 48px; color: #ddd; display: block; margin-bottom: 15px;"></i>
+                            Вставьте код и нажмите "Анализировать код", чтобы начать проверку
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 12px;">
+                    <button class="btn btn-export" id="exportPdfBtn">
+                        <i class="fas fa-file-pdf"></i> Экспорт в PDF
+                    </button>
+                    <button class="btn btn-export" id="exportHtmlBtn" style="background: linear-gradient(135deg, #6f42c1, #5a32a3);">
+                        <i class="fas fa-file-code"></i> Экспорт в HTML
+                    </button>
+                </div>
+            </div>
+
+            <!-- Git Repository Tab -->
+            <div class="tab-content" id="git-tab">
+                <div class="section-title">
+                    <i class="fab fa-github"></i> Анализ Git-репозитория
+                </div>
+                
+                <div class="control-group">
+                    <label for="gitUrl">URL репозитория (GitHub или GitLab):</label>
+                    <input type="text" id="gitUrl" placeholder="https://github.com/owner/repo или https://gitlab.com/owner/repo" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <div class="control-group">
+                    <label for="gitBranch">Ветка (опционально):</label>
+                    <input type="text" id="gitBranch" placeholder="main" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <div class="control-group">
+                    <label for="gitPath">Путь к файлу/папке (опционально):</label>
+                    <input type="text" id="gitPath" placeholder="src/ или src/Program.cs" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <div class="control-group">
+                    <label for="gitLanguage">Язык программирования:</label>
+                    <select id="gitLanguage" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                        <option value="">Автоопределение</option>
+                        <option value="C#">C#</option>
+                        <option value="Python">Python</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="TypeScript">TypeScript</option>
+                        <option value="Java">Java</option>
+                        <option value="C++">C++</option>
+                        <option value="Go">Go</option>
+                        <option value="Rust">Rust</option>
+                        <option value="PHP">PHP</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="gitToken">Personal Access Token (для приватных репозиториев и создания PR):</label>
+                    <input type="password" id="gitToken" placeholder="ghp_xxxx... или glpat-xxxx..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                    <button class="btn" id="validateTokenBtn" style="margin-top: 8px; padding: 8px 16px; font-size: 14px; background: #6c757d;">
+                        <i class="fas fa-check-circle"></i> Проверить токен
+                    </button>
+                    <span id="tokenStatus" style="margin-left: 10px; font-size: 14px;"></span>
+                </div>
+
+                <div class="control-group">
+                    <label>Опции:</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="display: flex; align-items: center; font-weight: normal;">
+                            <input type="checkbox" id="gitApplyFixes" style="margin-right: 8px;">
+                            Создать Pull Request с исправлениями
+                        </label>
+                        <label style="display: flex; align-items: center; font-weight: normal;">
+                            <input type="checkbox" id="gitAddComment" style="margin-right: 8px;">
+                            Оставить комментарий к существующему PR
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-group" id="prNumberGroup" style="display: none;">
+                    <label for="gitPrNumber">Номер PR/MR:</label>
+                    <input type="number" id="gitPrNumber" placeholder="1" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <button class="btn btn-analyze" id="analyzeGitBtn">
+                    <i class="fas fa-github"></i> Анализировать репозиторий
+                </button>
+
+                <div id="gitLoading" style="display: none; text-align: center; padding: 40px;">
+                    <div class="spinner" style="font-size: 24px; color: var(--primary-color); margin-bottom: 15px;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>Анализируется репозиторий... Это может занять несколько минут</p>
+                </div>
+
+                <div id="gitResultContent" style="margin-top: 20px;"></div>
+            </div>
+
+            <div class="tab-content" id="history-tab">
+                <div class="section-title">
+                    <i class="fas fa-history"></i> История анализа
+                </div>
+                <div id="historyList">
+                    <p style="color: #888; text-align: center; padding: 20px 0;">
+                        <i class="fas fa-history" style="font-size: 48px; color: #ddd; display: block; margin-bottom: 15px;"></i>
+                        История анализа пока пуста
+                    </p>
+                </div>
+                <button class="btn" style="background-color: #6c757d; margin-top: 15px;" id="clearHistoryBtn">
+                    <i class="fas fa-trash"></i> Очистить историю
+                </button>
+            </div>
+
+            <div class="tab-content" id="visualization-tab">
+                <div class="section-title">
+                    <i class="fas fa-chart-pie"></i> Визуализация результатов
+                </div>
+                <div class="visualization-container">
+                    <canvas id="analysisChart"></canvas>
+                </div>
+                <div id="chartLegend" style="text-align: center; margin-top: 10px;">
+                    <!-- Легенда будет добавлена динамически -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; width: 90%; max-width: 600px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: var(--secondary-color);"><i class="fas fa-cog" style="margin-right: 10px;"></i> Настройки</h2>
+                <button id="closeSettingsBtn" style="background: none; border: none; font-size: 24px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="control-group">
+                <label for="themeSelect">Тема интерфейса:</label>
+                <select id="themeSelect" style="width: 100%;">
+                    <option value="light">Светлая</option>
+                    <option value="dark">Темная</option>
+                    <option value="system">Системная</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="maxTokensInput">Макс. токенов для анализа:</label>
+                <input type="number" id="maxTokensInput" value="2000" min="500" max="8000" style="padding: 8px; width: 100%;">
+            </div>
+
+            <div class="control-group">
+                <label for="temperatureInput">Температура (креативность):</label>
+                <input type="range" id="temperatureInput" min="0" max="1" step="0.1" value="0.2" style="width: 100%;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px;">
+                    <span>Консервативно</span>
+                    <span id="temperatureValue">0.2</span>
+                    <span>Креативно</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Сохранять историю локально:</label>
+                <label style="display: inline-flex; align-items: center; margin-top: 5px;">
+                    <input type="checkbox" id="saveHistoryCheckbox" checked>
+                    <span style="margin-left: 8px;">Да, сохранять историю анализа на устройстве</span>
+                </label>
+            </div>
+
+            <div style="margin-top: 25px; display: flex; justify-content: flex-end; gap: 15px;">
+                <button class="btn" style="background-color: #6c757d;" id="resetSettingsBtn">
+                    <i class="fas fa-redo"></i> Сбросить
+                </button>
+                <button class="btn" id="saveSettingsBtn">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Глобальные переменные
+        let currentAnalysisId = null;
+        let analysisHistory = JSON.parse(localStorage.getItem('codeAnalysisHistory')) || [];
+        let chart = null;
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function () {
+            setupEventListeners();
+            renderHistory();
+            loadSettings();
+            initChart();
+        });
+
+        function setupEventListeners() {
+            // Переключение вкладок
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function () {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+
+                    if (tabId === 'visualization' && currentAnalysisId) {
+                        renderChart();
+                    }
+                });
+            });
+
+            // Анализ кода
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeCode);
+
+            // Загрузка файла
+            setupFileUpload();
+
+            // Экспорт
+            document.getElementById('exportPdfBtn').addEventListener('click', exportToPdf);
+            document.getElementById('exportHtmlBtn').addEventListener('click', exportToHtml);
+
+            // История
+            document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+
+            // Настройки
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                document.getElementById('settingsModal').style.display = 'flex';
+            });
+
+            document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+                document.getElementById('settingsModal').style.display = 'none';
+            });
+
+            document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+            document.getElementById('resetSettingsBtn').addEventListener('click', resetSettings);
+
+            // Изменение температуры
+            document.getElementById('temperatureInput').addEventListener('input', function () {
+                document.getElementById('temperatureValue').textContent = this.value;
+            });
+
+            // Git анализ
+            setupGitAnalysis();
+        }
+
+        function setupGitAnalysis() {
+            // Валидация токена
+            document.getElementById('validateTokenBtn').addEventListener('click', validateGitToken);
+            
+            // Переключение видимости поля номера PR
+            document.getElementById('gitAddComment').addEventListener('change', function() {
+                document.getElementById('prNumberGroup').style.display = this.checked ? 'block' : 'none';
+            });
+
+            // Анализ репозитория
+            document.getElementById('analyzeGitBtn').addEventListener('click', analyzeGitRepo);
+        }
+
+        async function validateGitToken() {
+            const token = document.getElementById('gitToken').value;
+            const statusEl = document.getElementById('tokenStatus');
+            
+            if (!token) {
+                statusEl.textContent = 'Введите токен';
+                statusEl.style.color = '#dc3545';
+                return;
+            }
+
+            statusEl.textContent = 'Проверка...';
+            statusEl.style.color = '#666';
+
+            // Определяем платформу по URL
+            const url = document.getElementById('gitUrl').value;
+            let platform = 'github';
+            if (url.includes('gitlab')) {
+                platform = 'gitlab';
+            }
+
+            try {
+                const response = await fetch('/api/git/validate-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ platform, token })
+                });
+
+                const result = await response.json();
+                
+                if (result.isValid) {
+                    statusEl.textContent = `✓ Токен валиден (пользователь: ${result.userName})`;
+                    statusEl.style.color = '#28a745';
+                } else {
+                    statusEl.textContent = `✗ ${result.errorMessage}`;
+                    statusEl.style.color = '#dc3545';
+                }
+            } catch (err) {
+                statusEl.textContent = '✗ Ошибка проверки токена';
+                statusEl.style.color = '#dc3545';
+            }
+        }
+
+        async function analyzeGitRepo() {
+            const url = document.getElementById('gitUrl').value;
+            const branch = document.getElementById('gitBranch').value;
+            const path = document.getElementById('gitPath').value;
+            const language = document.getElementById('gitLanguage').value;
+            const token = document.getElementById('gitToken').value;
+            const applyFixes = document.getElementById('gitApplyFixes').checked;
+            const addComment = document.getElementById('gitAddComment').checked;
+            const prNumber = document.getElementById('gitPrNumber').value;
+
+            if (!url) {
+                alert('Введите URL репозитория!');
+                return;
+            }
+
+            // Определяем платформу
+            const platform = url.includes('gitlab') ? 'gitlab' : 'github';
+
+            document.getElementById('gitLoading').style.display = 'block';
+            document.getElementById('gitResultContent').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/git/analyze-repo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        repositoryUrl: url,
+                        branch: branch || undefined,
+                        path: path || undefined,
+                        language: language || undefined,
+                        token: token || undefined,
+                        analysisType: 'Full',
+                        applyFixes: applyFixes,
+                        addComment: addComment,
+                        pullRequestNumber: prNumber ? parseInt(prNumber) : undefined
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText);
+                }
+
+                const result = await response.json();
+                
+                // Форматируем и отображаем результат
+                let html = `
+                    <div class="section-title">
+                        <i class="fas fa-folder"></i> ${result.owner}/${result.repo}
+                        <span style="margin-left: auto; font-size: 14px; font-weight: normal;">
+                            Ветка: ${result.branch}
+                        </span>
+                    </div>
+                    
+                    <div class="category-section">
+                        <div class="category-title">
+                            <i class="fas fa-list"></i> Проанализированные файлы (${result.files.length})
+                        </div>
+                        <div class="issue-list">
+                            ${result.files.map(f => `
+                                <div class="issue-item" style="border-left-color: #4a6fa5;">
+                                    <i class="fas fa-file-code" style="margin-right: 8px;"></i>
+                                    ${f.path}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                // Результат анализа
+                if (result.analysisResult) {
+                    html += `
+                        <div class="category-section">
+                            <div class="category-title">
+                                <i class="fas fa-chart-line"></i> Результаты анализа
+                            </div>
+                            <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; max-height: 500px; overflow-y: auto; white-space: pre-wrap;">${result.analysisResult}</pre>
+                        </div>
+                    `;
+                }
+
+                // Результат применения исправлений
+                if (result.fixResult) {
+                    if (result.fixResult.success) {
+                        html += `
+                            <div class="summary-box" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                                <div class="summary-title">
+                                    <i class="fas fa-check-circle"></i> Pull Request создан
+                                </div>
+                                <p><a href="${result.fixResult.pullRequestUrl}" target="_blank" style="color: white; text-decoration: underline;">${result.fixResult.pullRequestUrl}</a></p>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="issue-item issue-errors">
+                                <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                                Ошибка при создании PR: ${result.fixResult.errorMessage}
+                            </div>
+                        `;
+                    }
+                }
+
+                // Результат добавления комментария
+                if (result.commentAdded) {
+                    html += `
+                        <div class="summary-box" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                            <div class="summary-title">
+                                <i class="fas fa-comment"></i> Комментарий добавлен
+                            </div>
+                            <p><a href="${result.commentUrl}" target="_blank" style="color: white; text-decoration: underline;">${result.commentUrl}</a></p>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('gitResultContent').innerHTML = html;
+
+            } catch (err) {
+                document.getElementById('gitResultContent').innerHTML = `
+                    <div class="issue-item issue-errors">
+                        <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                        <strong>Ошибка:</strong> ${err.message}
+                        <p style="font-size: 14px; color: #666; margin-top: 8px;">
+                            Убедитесь, что:<br>
+                            • URL репозитория верный<br>
+                            • Токен имеет необходимые права (repo для GitHub, api для GitLab)<br>
+                            • Репозиторий существует и доступен
+                        </p>
+                    </div>
+                `;
+            } finally {
+                document.getElementById('gitLoading').style.display = 'none';
+            }
+        }
+
+        function setupFileUpload() {
+            const dragDropArea = document.getElementById('dragDropArea');
+            const fileInput = document.getElementById('fileInput');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dragDropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dragDropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dragDropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dragDropArea.classList.add('drag-over');
+            }
+
+            function unhighlight() {
+                dragDropArea.classList.remove('drag-over');
+            }
+
+            dragDropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length) {
+                    fileInput.files = files;
+                    handleFileSelect({ target: fileInput });
+                }
+            }
+
+            dragDropArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', handleFileSelect);
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                document.getElementById('codeInput').value = event.target.result;
+
+                // Определяем язык по расширению файла
+                const extension = file.name.split('.').pop().toLowerCase();
+                const languageMap = {
+                    'cs': 'C#',
+                    'py': 'Python',
+                    'js': 'JavaScript',
+                    'ts': 'TypeScript',
+                    'java': 'Java',
+                    'cpp': 'C++',
+                    'c': 'C',
+                    'h': 'C++',
+                    'hpp': 'C++',
+                    'go': 'Go',
+                    'rs': 'Rust',
+                    'php': 'PHP',
+                    'rb': 'Ruby',
+                    'swift': 'Swift',
+                    'kt': 'Kotlin',
+                    'kts': 'Kotlin',
+                    'sql': 'SQL'
+                };
+
+                const language = languageMap[extension] || 'C#';
+                document.getElementById('languageSelect').value = language;
+            };
+            reader.readAsText(file);
+        }
+
+        async function analyzeCode() {
+            const code = document.getElementById('codeInput').value;
+            const language = document.getElementById('languageSelect').value;
+            const analysisType = document.getElementById('analysisType').value;
+
+            if (!code.trim()) {
+                alert("Пожалуйста, введите код для анализа!");
+                return;
+            }
+
+            // Показываем индикатор загрузки
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultContent').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/codeanalysis/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        language: language,
+                        analysisType: analysisType,
+                        complexityLimit: code.length > 500 ? 2000 : 1000
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Ошибка сервера: ${response.status}. ${errorText.substring(0, 100)}...`);
+                }
+
+                const resultText = await response.text();
+                let result;
+
+                try {
+                    result = JSON.parse(resultText);
+                    document.getElementById('resultContent').innerHTML = formatAnalysisResult(result, language);
+
+                    // Сохраняем в историю
+                    const historyItem = {
+                        id: Date.now(),
+                        timestamp: new Date().toISOString(),
+                        code: code,
+                        language: language,
+                        result: JSON.stringify(result),
+                        analysisType: analysisType
+                    };
+
+                    currentAnalysisId = historyItem.id;
+                    saveToHistory(historyItem);
+                    renderHistory();
+
+                    // Обновляем визуализацию
+                    if (chart) {
+                        renderChart(result);
+                    }
+                } catch (e) {
+                    // Если не JSON — просто покажем как есть
+                    document.getElementById('resultContent').innerHTML = `
+                        <pre style="white-space: pre-wrap; background: #f8f9fa; padding: 15px; border-radius: 5px; max-height: 500px; overflow-y: auto;">
+                            ${resultText}
+                        </pre>
+                    `;
+                }
+            } catch (err) {
+                document.getElementById('resultContent').innerHTML = `
+                    <div style="color: #dc3545; padding: 20px; background: #ffeeee; border-radius: 5px; margin-top: 10px;">
+                        <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i>
+                        <strong>❌ Ошибка:</strong> ${err.message}
+                        <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                            Проверьте, запущен ли LM Studio и доступен ли сервер по адресу http://127.0.0.1:1234
+                        </p>
+                    </div>
+                `;
+                console.error('Ошибка при анализе:', err);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function formatAnalysisResult(data, language) {
+            // Проверяем, что data - объект
+            if (typeof data !== 'object' || data === null) {
+                return `
+                    <div style="color: #dc3545; padding: 20px; background: #ffeeee; border-radius: 5px;">
+                        <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i>
+                        <strong>❌ Ошибка формата:</strong> Ответ не является JSON объектом
+                        <pre style="margin-top: 10px; white-space: pre-wrap;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+
+            const complexityScore = data.complexity_score || 0;
+            const scoreClass = complexityScore <= 3 ? 'score-0-3' :
+                complexityScore <= 6 ? 'score-4-6' : 'score-7-10';
+
+            let html = `
+                <div class="section-title">
+                    <i class="fas fa-chart-line"></i> Результаты анализа (${language})
+                    <span style="margin-left: auto; padding: 4px 12px; background: #4a6fa5; color: white; border-radius: 20px; font-size: 14px;">
+                        Сложность: ${complexityScore}/10
+                    </span>
+                </div>
+            `;
+
+            // Оценки
+            html += `
+                <div class="score-container">
+                    <div class="score-card complexity-score">
+                        <div>Сложность</div>
+                        <div class="score-value">${complexityScore}</div>
+                    </div>
+                    <div class="score-card maintainability-score">
+                        <div>Сопровождение</div>
+                        <div class="score-value">${data.maintainability_score || 0}</div>
+                    </div>
+                    <div class="score-card security-score">
+                        <div>Безопасность</div>
+                        <div class="score-value">${data.security_score || 0}</div>
+                    </div>
+                    <div class="score-card performance-score">
+                        <div>Производительность</div>
+                        <div class="score-value">${data.performance_score || 0}</div>
+                    </div>
+                </div>
+            `;
+
+            // Вспомогательная функция для отображения списка проблем
+            function renderIssueList(issues, category, icon, color, defaultMessage) {
+                if (issues && Array.isArray(issues) && issues.length > 0 &&
+                    !(issues.length === 1 && issues[0].includes("Нет"))) {
+                    return issues.map(issue =>
+                        `<div class="issue-item issue-${category}">
+                            <i class="fas ${icon}" style="margin-right: 8px; color: ${color};"></i>
+                            ${issue}
+                        </div>`
+                    ).join('');
+                } else {
+                    return `
+                        <div class="issue-item issue-${category}" style="background-color: rgba(40, 167, 69, 0.1); border-left-color: #28a745;">
+                            <i class="fas fa-check-circle" style="margin-right: 8px; color: #28a745;"></i>
+                            ${defaultMessage}
+                        </div>
+                    `;
+                }
+            }
+
+            // Ошибки
+            html += `
+                <div class="category-section">
+                    <div class="category-title" style="color: #dc3545;">
+                        <i class="fas fa-bug"></i> Ошибки
+                    </div>
+                    <div>
+                        ${renderIssueList(data.errors, 'errors', 'fa-times-circle', '#dc3545', 'Ошибок не обнаружено')}
+                    </div>
+                </div>
+            `;
+
+            // Стиль
+            html += `
+                <div class="category-section">
+                    <div class="category-title" style="color: #ffc107;">
+                        <i class="fas fa-palette"></i> Проблемы стиля
+                    </div>
+                    <div>
+                        ${renderIssueList(data.style_issues, 'style', 'fa-exclamation-triangle', '#ffc107', 'Код соответствует стандартам стиля')}
+                    </div>
+                </div>
+            `;
+
+            // Безопасность
+            html += `
+                <div class="category-section">
+                    <div class="category-title" style="color: #166088;">
+                        <i class="fas fa-shield-alt"></i> Риски безопасности
+                    </div>
+                    <div>
+                        ${renderIssueList(data.security_risks, 'security', 'fa-user-secret', '#166088', 'Уязвимостей не обнаружено')}
+                    </div>
+                </div>
+            `;
+
+            // Производительность
+            if (data.performance_issues && Array.isArray(data.performance_issues) && data.performance_issues.length > 0) {
+                html += `
+                    <div class="category-section">
+                        <div class="category-title" style="color: #6f42c1;">
+                            <i class="fas fa-tachometer-alt"></i> Проблемы производительности
+                        </div>
+                        <div>
+                            ${data.performance_issues.map(issue =>
+                    `<div class="issue-item issue-performance">
+                                    <i class="fas fa-bolt" style="margin-right: 8px; color: #6f42c1;"></i>
+                                    ${issue}
+                                </div>`
+                ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Рекомендации
+            html += `
+                <div class="category-section">
+                    <div class="category-title" style="color: #28a745;">
+                        <i class="fas fa-lightbulb"></i> Рекомендации
+                    </div>
+                    <div>
+                        ${renderIssueList(data.best_practices, 'best', 'fa-bolt', '#28a745', 'Дополнительных рекомендаций нет')}
+                    </div>
+                </div>
+            `;
+
+            // Примеры улучшенного кода
+            if (data.code_suggestions && Array.isArray(data.code_suggestions) && data.code_suggestions.length > 0) {
+                html += `
+                    <div class="category-section">
+                        <div class="category-title" style="color: #6f42c1;">
+                            <i class="fas fa-code"></i> Примеры улучшенного кода
+                        </div>
+                        <div>
+                            ${data.code_suggestions.map(suggestion =>
+                    `<div class="issue-item issue-code-suggestion">
+                                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 5px 0; overflow-x: auto; white-space: pre-wrap;">${suggestion}</pre>
+                                </div>`
+                ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Резюме
+            html += `
+                <div class="summary-box">
+                    <div class="summary-title">
+                        <i class="fas fa-file-alt"></i> Резюме
+                    </div>
+                    <p>${data.summary || 'Анализ завершен успешно.'}</p>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function saveToHistory(item) {
+            analysisHistory.unshift(item); // Добавляем в начало массива
+
+            // Ограничиваем размер истории
+            if (analysisHistory.length > 50) {
+                analysisHistory = analysisHistory.slice(0, 50);
+            }
+
+            // Сохраняем в localStorage, если разрешено
+            const settings = JSON.parse(localStorage.getItem('codeCheckerSettings') || '{}');
+            if (settings.saveHistory !== false) {
+                localStorage.setItem('codeAnalysisHistory', JSON.stringify(analysisHistory));
+            }
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            if (analysisHistory.length === 0) {
+                historyList.innerHTML = `
+                    <p style="color: #888; text-align: center; padding: 20px 0;">
+                        <i class="fas fa-history" style="font-size: 48px; color: #ddd; display: block; margin-bottom: 15px;"></i>
+                        История анализа пока пуста
+                    </p>
+                `;
+                return;
+            }
+
+            let html = '';
+            analysisHistory.slice(0, 10).forEach(item => {
+                const date = new Date(item.timestamp);
+                html += `
+                    <div class="history-item" data-id="${item.id}" onclick="loadHistoryItem(${item.id})">
+                        <strong>${item.language}</strong> - ${date.toLocaleString('ru-RU', {
+                    hour: '2-digit', minute: '2-digit',
+                    day: '2-digit', month: '2-digit'
+                })}
+                        <div class="history-date">
+                            Тип анализа: ${item.analysisType}
+                        </div>
+                    </div>
+                `;
+            });
+
+            historyList.innerHTML = html;
+        }
+
+        function loadHistoryItem(id) {
+            const item = analysisHistory.find(h => h.id === id);
+            if (!item) return;
+
+            document.getElementById('codeInput').value = item.code;
+            document.getElementById('languageSelect').value = item.language;
+
+            try {
+                const result = JSON.parse(item.result);
+                document.getElementById('resultContent').innerHTML = formatAnalysisResult(result, item.language);
+                currentAnalysisId = id;
+
+                // Переключаем на вкладку результатов
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                document.querySelector('.tab[data-tab="analysis"]').classList.add('active');
+                document.getElementById('analysis-tab').classList.add('active');
+            } catch (e) {
+                console.error('Ошибка при загрузке результата из истории:', e);
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Вы уверены, что хотите очистить всю историю анализа?')) {
+                analysisHistory = [];
+                localStorage.removeItem('codeAnalysisHistory');
+                renderHistory();
+            }
+        }
+
+        function exportToPdf() {
+            if (!currentAnalysisId) {
+                alert('Сначала выполните анализ кода!');
+                return;
+            }
+            window.open(`/api/export/pdf/${currentAnalysisId}`, '_blank');
+        }
+
+        function exportToHtml() {
+            if (!currentAnalysisId) {
+                alert('Сначала выполните анализ кода!');
+                return;
+            }
+            window.open(`/api/export/html/${currentAnalysisId}`, '_blank');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('analysisChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Ошибки', 'Стиль', 'Безопасность', 'Рекомендации', 'Сложность'],
+                    datasets: [{
+                        label: 'Качество кода',
+                        data: [10, 10, 10, 10, 10],
+                        fill: true,
+                        backgroundColor: 'rgba(74, 111, 165, 0.2)',
+                        borderColor: 'rgba(74, 111, 165, 1)',
+                        pointBackgroundColor: 'rgba(74, 111, 165, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(74, 111, 165, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderChart(result = null) {
+            if (!chart) return;
+
+            if (!result) {
+                // Пытаемся получить текущий результат
+                const item = analysisHistory.find(h => h.id === currentAnalysisId);
+                if (item) {
+                    try {
+                        result = JSON.parse(item.result);
+                    } catch (e) {
+                        console.error('Ошибка при парсинге результата для визуализации:', e);
+                    }
+                }
+            }
+
+            if (!result) return;
+
+            // Вычисляем оценки по категориям
+            const scores = {
+                errors: result.errors && result.errors.length > 0 && result.errors[0] !== "Нет ошибок" ?
+                    Math.max(0, 10 - result.errors.length * 2) : 10,
+                style: result.style_issues && result.style_issues.length > 0 && result.style_issues[0] !== "Нет замечаний" ?
+                    Math.max(0, 10 - result.style_issues.length * 1.5) : 10,
+                security: result.security_risks && result.security_risks.length > 0 && result.security_risks[0] !== "Нет угроз" ?
+                    Math.max(0, 10 - result.security_risks.length * 2.5) : 10,
+                bestPractices: result.best_practices && result.best_practices.length > 0 && result.best_practices[0] !== "Нет рекомендаций" ?
+                    Math.min(10, result.best_practices.length * 1.5) : 5,
+                complexity: 10 - (result.complexity_score || 5)
+            };
+
+            chart.data.datasets[0].data = [
+                scores.errors,
+                scores.style,
+                scores.security,
+                scores.bestPractices,
+                scores.complexity
+            ];
+            chart.update();
+        }
+
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('codeCheckerSettings') || '{}');
+
+            document.getElementById('themeSelect').value = settings.theme || 'light';
+            document.getElementById('maxTokensInput').value = settings.maxTokens || 2000;
+            document.getElementById('temperatureInput').value = settings.temperature || 0.2;
+            document.getElementById('temperatureValue').textContent = settings.temperature || 0.2;
+            document.getElementById('saveHistoryCheckbox').checked = settings.saveHistory !== false;
+        }
+
+        function saveSettings() {
+            const settings = {
+                theme: document.getElementById('themeSelect').value,
+                maxTokens: parseInt(document.getElementById('maxTokensInput').value),
+                temperature: parseFloat(document.getElementById('temperatureInput').value),
+                saveHistory: document.getElementById('saveHistoryCheckbox').checked
+            };
+
+            localStorage.setItem('codeCheckerSettings', JSON.stringify(settings));
+
+            // Применяем тему
+            applyTheme(settings.theme);
+
+            alert('Настройки успешно сохранены!');
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function resetSettings() {
+            if (confirm('Вы уверены, что хотите сбросить все настройки к значениям по умолчанию?')) {
+                localStorage.removeItem('codeCheckerSettings');
+                loadSettings();
+
+                // Сбрасываем тему
+                applyTheme('light');
+            }
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.style.backgroundColor = '#2d3748';
+                document.body.style.color = '#e2e8f0';
+
+                document.querySelectorAll('.editor-section, .results-section, .history-section').forEach(el => {
+                    el.style.backgroundColor = '#4a5568';
+                });
+
+                document.querySelectorAll('.section-title').forEach(el => {
+                    el.style.color = '#cbd5e0';
+                });
+
+                document.querySelectorAll('.issue-item').forEach(el => {
+                    el.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                });
+            } else {
+                document.body.style.backgroundColor = '#f5f7fa';
+                document.body.style.color = '#333';
+
+                document.querySelectorAll('.editor-section, .results-section, .history-section').forEach(el => {
+                    el.style.backgroundColor = 'white';
+                });
+
+                document.querySelectorAll('.section-title').forEach(el => {
+                    el.style.color = '#166088';
+                });
+
+                document.querySelectorAll('.issue-item').forEach(el => {
+                    el.style.backgroundColor = '';
+                });
+            }
+        }
+
+        // Поддержка горячих клавиш
+        document.addEventListener('keydown', function (e) {
+            // Ctrl+Enter для анализа
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                analyzeCode();
+            }
+
+            // Ctrl+O для открытия файла
+            if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+                e.preventDefault();
+                document.getElementById('fileInput').click();
+            }
+
+            // Ctrl+S для сохранения в историю (если есть результаты)
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (currentAnalysisId) {
+                    alert('Результаты анализа уже сохранены в историю');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

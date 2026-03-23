@@ -1,0 +1,6 @@
+requestID;startDate;carType;carModel;problemDescryption;requestStatus;completionDate;repairParts;masterID;clientID
+1;2023-06-06;Легковая;Hyundai Avante (CN7);Отказали тормоза.;В процессе ремонта;null;;2;7
+2;2023-05-05;Легковая;Nissan 180SX ;Отказали тормоза.;В процессе ремонта;null;;3;8
+3;2022-07-07;Легковая;Toyota 2000GT ;В салоне пахнет бензином.;Готова к выдаче;2023-01-01;;3;9
+4;2023-08-02;Грузовая;Citroen Berlingo (B9);Руль плохо крутится.;Новая заявка;null;;null;8
+5;2023-08-02;Грузовая;УАЗ 2360 ;Руль плохо крутится.;Новая заявка;null;;null;9

@@ -1,0 +1,125 @@
+{
+  "Version": 1,
+  "Hash": "enpC8vrnTQpKj6yS8a292altdEnT97HxRkpttBx4P2E=",
+  "Source": "CodeQualityChecker",
+  "BasePath": "_content/CodeQualityChecker",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "CodeQualityChecker\\wwwroot",
+      "Source": "CodeQualityChecker",
+      "ContentRoot": "C:\\Users\\sereg\\OneDrive\\Рабочий стол\\Учебка 4\\фИНАЛ ПП\\CodeQualityChecker\\CodeQualityChecker\\wwwroot\\",
+      "BasePath": "_content/CodeQualityChecker",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\sereg\\OneDrive\\Рабочий стол\\Учебка 4\\фИНАЛ ПП\\CodeQualityChecker\\CodeQualityChecker\\wwwroot\\index.html",
+      "SourceId": "CodeQualityChecker",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\sereg\\OneDrive\\Рабочий стол\\Учебка 4\\фИНАЛ ПП\\CodeQualityChecker\\CodeQualityChecker\\wwwroot\\",
+      "BasePath": "_content/CodeQualityChecker",
+      "RelativePath": "index#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "tncwxsdpbb",
+      "Integrity": "GcmtyEFN7VRoPiiO7XPci1K9DUM88nvpqmo1+BF7KHo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "index.html",
+      "AssetFile": "C:\\Users\\sereg\\OneDrive\\Рабочий стол\\Учебка 4\\фИНАЛ ПП\\CodeQualityChecker\\CodeQualityChecker\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "64648"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"GcmtyEFN7VRoPiiO7XPci1K9DUM88nvpqmo1+BF7KHo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 22 Mar 2026 15:03:45 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-GcmtyEFN7VRoPiiO7XPci1K9DUM88nvpqmo1+BF7KHo="
+        }
+      ]
+    },
+    {
+      "Route": "index.tncwxsdpbb.html",
+      "AssetFile": "C:\\Users\\sereg\\OneDrive\\Рабочий стол\\Учебка 4\\фИНАЛ ПП\\CodeQualityChecker\\CodeQualityChecker\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "64648"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"GcmtyEFN7VRoPiiO7XPci1K9DUM88nvpqmo1+BF7KHo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 22 Mar 2026 15:03:45 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "tncwxsdpbb"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-GcmtyEFN7VRoPiiO7XPci1K9DUM88nvpqmo1+BF7KHo="
+        }
+      ]
+    }
+  ]
+}

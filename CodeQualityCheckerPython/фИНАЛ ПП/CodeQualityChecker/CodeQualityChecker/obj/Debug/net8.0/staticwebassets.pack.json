@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\sereg\\OneDrive\\Рабочий стол\\Учебка 4\\фИНАЛ ПП\\CodeQualityChecker\\CodeQualityChecker\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.CodeQualityChecker.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.CodeQualityChecker.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.CodeQualityChecker.props",
+      "PackagePath": "build\\CodeQualityChecker.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.CodeQualityChecker.props",
+      "PackagePath": "buildMultiTargeting\\CodeQualityChecker.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.CodeQualityChecker.props",
+      "PackagePath": "buildTransitive\\CodeQualityChecker.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

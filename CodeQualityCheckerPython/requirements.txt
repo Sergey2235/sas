@@ -1,0 +1,20 @@
+# UI
+customtkinter>=5.2.0
+
+# HTTP запросы
+requests>=2.31.0
+
+# JSON
+orjson>=3.9.0
+
+# Для PDF
+reportlab>=4.0.0
+
+# Для SQLite (встроена в Python)
+# sqlite3
+
+# Для работы с файлами
+# встроено
+
+# Для даты/времени
+# встроено
