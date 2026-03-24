@@ -1,0 +1,38 @@
+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
+ {
+    "id": "gemma3:12b",
+    "object": "model",
+    "created": 1771925509,
+    "owned_by": "library"
+  },
+  {
+    "id": "deepseek-r1:8b",
+    "object": "model",
+    "created": 1764927158,
+    "owned_by": "library"
+  },
+  {
+    "id": "qwen3:30b",
+    "object": "model",
+    "created": 1760522703,
+    "owned_by": "library"
+  },
+  {
+    "id": "qwen2.5-coder:32b",
+    "object": "model",
+    "created": 1744099936,
+    "owned_by": "library"
+  },
+  {
+    "id": "qwen2.5-coder:14b",
+    "object": "model",
+    "created": 1744087290,
+    "owned_by": "library"
+  },
+  {
+    "id": "jeffh/intfloat-multilingual-e5-large-instruct:f16",
+    "object": "model",
+    "created": 1744003049,
+    "owned_by": "jeffh"
+  }
+]
